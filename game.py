@@ -30,7 +30,7 @@ class Piece:
         row, col = self.pos
         target_row, target_col = target_pos
         
-        # 狮虎跳河规则
+        # 狮虎跳到河对岸的规则
         if self.type in [PieceType.LION, PieceType.TIGER]:
             # 检查是否是横向或纵向跳跃
             if (row == target_row and abs(col - target_col) == 3) or \
@@ -261,6 +261,16 @@ class DouShouQi:
 
         return None
 
+    def get_valid_moves(self, piece):
+        valid_moves = []
+        for row in range(9):
+            for col in range(7):
+                if piece.can_move((row, col), self.board):
+                    target_piece = self.board[row][col]
+                    if target_piece is None or piece.can_capture(target_piece, self.board):
+                        valid_moves.append((row, col))
+        return valid_moves
+
     def draw_board(self):
         # 绘制棋盘背景
         self.screen.fill(self.BACKGROUND_COLOR)
@@ -366,6 +376,19 @@ class DouShouQi:
             pygame.draw.line(self.screen, self.GRID_COLOR,
                            (start_x + i * self.CELL_SIZE, start_y),
                            (start_x + i * self.CELL_SIZE, start_y + 9 * self.CELL_SIZE))
+
+        # 如果有选中的棋子，绘制可移动位置的虚线圆圈
+        if self.selected_piece:
+            valid_moves = self.get_valid_moves(self.selected_piece)
+            for row, col in valid_moves:
+                center_x = start_x + col * self.CELL_SIZE + self.CELL_SIZE // 2
+                center_y = start_y + row * self.CELL_SIZE + self.CELL_SIZE // 2
+                piece_radius = int(self.CELL_SIZE // 2.5)
+                # 绘制实心点
+                point_radius = piece_radius // 6  # 点的大小为棋子半径的1/6
+                pygame.draw.circle(self.screen, (255, 255, 0),
+                                 (center_x, center_y),
+                                 point_radius)
         
         # 绘制棋子
         for row in range(9):
@@ -442,8 +465,6 @@ class DouShouQi:
                     pygame.quit()
                     sys.exit()
                 
-
-                
                 # 处理鼠标事件
                 if not self.winner:  # 只有在游戏未结束时才处理移动
                     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -452,7 +473,9 @@ class DouShouQi:
                             row, col = pos
                             piece = self.board[row][col]
                             if piece and piece.player == self.current_player:
+                                # 选中棋子时就显示可移动位置
                                 self.selected_piece = piece
+                                piece.selected = True
                                 self.dragging = True
                                 self.drag_pos = event.pos
                 
@@ -469,8 +492,6 @@ class DouShouQi:
                             
                             # 检查移动是否合法
                             if self.selected_piece.can_move(pos, self.board):
-
-                                
                                 # 如果目标位置有对方棋子
                                 target_piece = self.board[row][col]
                                 old_pos = self.selected_piece.pos
@@ -482,7 +503,6 @@ class DouShouQi:
                                         self.board[old_row][old_col] = None
                                         self.selected_piece.pos = pos
                                         self.log_move(self.selected_piece, old_pos, pos, target_piece)
-
                                         self.current_player = 'blue' if self.current_player == 'red' else 'red'
                                 else:
                                     # 移动到空位置
@@ -490,7 +510,6 @@ class DouShouQi:
                                     self.board[old_row][old_col] = None
                                     self.selected_piece.pos = pos
                                     self.log_move(self.selected_piece, old_pos, pos)
-
                                     self.current_player = 'blue' if self.current_player == 'red' else 'red'
                                 
                                 # 检查胜利条件
@@ -500,6 +519,8 @@ class DouShouQi:
                                     winner_text = '红方胜利！' if winner == 'red' else '蓝方胜利！'
                                     self.log_file.write('\n' + winner_text + '\n')
                         
+                        if self.selected_piece:
+                            self.selected_piece.selected = False
                         self.dragging = False
                         self.selected_piece = None
                         self.drag_pos = None
