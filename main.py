@@ -1,7 +1,7 @@
 import pygame
 import sys
 from enum import Enum
-from utils import load_image, get_piece_image_path
+from utils import load_image
 import os
 
 # 初始化Pygame

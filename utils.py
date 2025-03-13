@@ -36,5 +36,5 @@ def get_piece_image_path(piece_type, player):
     }
     
     piece_name = piece_names[piece_type.name]
-    return os.path.join('images', f'{piece_name}.png')
+    # return os.path.join('images', f'{piece_name}.png')
     return os.path.join('images', f'{piece_name}_{player}.png')
