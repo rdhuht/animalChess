@@ -174,6 +174,15 @@ class DouShouQi:
         self.drag_pos = None
         self.winner = None
         
+        # 存储被吃掉的棋子
+        self.captured_pieces = {'red': [], 'blue': []}
+        # 动画相关属性
+        self.animation_frame = 0
+        self.animation_count = 0
+        self.animation_pieces = []
+        self.ANIMATION_FRAMES = 30  # 每次摆动的帧数
+        self.ANIMATION_REPEATS = 5  # 摆动次数
+        
         # 初始化日志文件
         self.init_log_file()
         
@@ -535,7 +544,7 @@ class DouShouQi:
                                 winner = self.check_win()
                                 if winner:
                                     self.winner = winner
-                                    winner_text = '红方胜利！' if winner == 'red' else '蓝方胜利！'
+                                    winner_text = '红方胜利' if winner == 'red' else '蓝方胜利'
                                     self.log_file.write('\n' + winner_text + '\n')
                         
                         if self.selected_piece:
@@ -549,7 +558,7 @@ class DouShouQi:
             
             # 如果有获胜方，显示获胜信息
             if self.winner:
-                winner_text = '红方胜利！' if self.winner == 'red' else '蓝方胜利！'
+                winner_text = '红方胜利' if self.winner == 'red' else '蓝方胜利'
                 winner_surface = self.winner_font.render(winner_text, True,
                                                        self.RED_COLOR if self.winner == 'red' else self.BLUE_COLOR)
                 text_rect = winner_surface.get_rect(center=(self.WINDOW_SIZE[0] // 2, self.WINDOW_SIZE[1] // 2))
