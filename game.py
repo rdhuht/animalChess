@@ -280,15 +280,32 @@ class DouShouQi:
         # 计算棋盘的起始位置（居中）
         start_x = (self.WINDOW_SIZE[0] - 7 * self.CELL_SIZE) // 2
         start_y = (self.WINDOW_SIZE[1] - 9 * self.CELL_SIZE) // 2
+
+        # 绘制所有格子的草地背景
+        if self.piece_images.get('grass'):
+            for row in range(9):
+                for col in range(7):
+                    grass_rect = pygame.Rect(start_x + col * self.CELL_SIZE,
+                                           start_y + row * self.CELL_SIZE,
+                                           self.CELL_SIZE, self.CELL_SIZE)
+                    self.screen.blit(self.piece_images['grass'], grass_rect)
         
         # 绘制特殊区域
         # 河流
         for row in range(3, 6):
             for col in [1, 2, 4, 5]:
-                pygame.draw.rect(self.screen, self.RIVER_COLOR,
-                               (start_x + col * self.CELL_SIZE,
-                                start_y + row * self.CELL_SIZE,
-                                self.CELL_SIZE, self.CELL_SIZE))
+                if self.piece_images.get('water'):
+                    # 使用图片绘制河流
+                    water_rect = pygame.Rect(start_x + col * self.CELL_SIZE,
+                                          start_y + row * self.CELL_SIZE,
+                                          self.CELL_SIZE, self.CELL_SIZE)
+                    self.screen.blit(self.piece_images['water'], water_rect)
+                else:
+                    # 如果没有图片，使用原有的绘制方式
+                    pygame.draw.rect(self.screen, self.RIVER_COLOR,
+                                   (start_x + col * self.CELL_SIZE,
+                                    start_y + row * self.CELL_SIZE,
+                                    self.CELL_SIZE, self.CELL_SIZE))
         
         # 陷阱
         trap_positions = [(0, 2), (0, 4), (1, 3), (8, 2), (8, 4), (7, 3)]
@@ -358,7 +375,7 @@ class DouShouQi:
                     color = self.RED_COLOR if piece.player == 'red' else self.BLUE_COLOR
                     center_x = start_x + col * self.CELL_SIZE + self.CELL_SIZE // 2
                     center_y = start_y + row * self.CELL_SIZE + self.CELL_SIZE // 2
-                    piece_radius = self.CELL_SIZE // 3
+                    piece_radius = int(self.CELL_SIZE // 2.5)  # 增加棋子半径
                     
                     # 绘制棋子底色
                     pygame.draw.circle(self.screen, color,
@@ -381,7 +398,7 @@ class DouShouQi:
                     image = self.piece_images.get((piece.type, piece.player))
                     if image:
                         # 计算图片缩放尺寸（填充圆形区域）
-                        scaled_size = int(piece_radius * 1.618)  # 稍微放大以填满圆形
+                        scaled_size = int(piece_radius * 1.618)  # 调整图片缩放比例
                         scaled_image = pygame.transform.scale(image, (scaled_size, scaled_size))
                         # 计算图片位置（居中显示）
                         image_rect = scaled_image.get_rect()
@@ -562,16 +579,22 @@ class DouShouQi:
                 self.piece_images[(piece_type, 'red')] = None
                 self.piece_images[(piece_type, 'blue')] = None
         
-        # 加载陷阱和兽穴图片
+        # 加载陷阱、兽穴、河流和草地图片
         try:
             trap_image = load_image(os.path.join('images', 'trap.png'), (self.CELL_SIZE, self.CELL_SIZE))
             den_image = load_image(os.path.join('images', 'den.png'), (self.CELL_SIZE, self.CELL_SIZE))
+            water_image = load_image(os.path.join('images', 'water.png'), (self.CELL_SIZE, self.CELL_SIZE))
+            grass_image = load_image(os.path.join('images', 'grass.png'), (self.CELL_SIZE, self.CELL_SIZE))
             self.piece_images['trap'] = trap_image
             self.piece_images['den'] = den_image
+            self.piece_images['water'] = water_image
+            self.piece_images['grass'] = grass_image
         except FileNotFoundError as e:
             print(f"警告：找不到特殊区域图片文件：{e}")
             self.piece_images['trap'] = None
             self.piece_images['den'] = None
+            self.piece_images['water'] = None
+            self.piece_images['grass'] = None
 
     def init_pieces(self):
         # 初始化蓝方棋子
