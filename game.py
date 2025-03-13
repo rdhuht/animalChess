@@ -129,7 +129,7 @@ class DouShouQi:
         
         # 颜色定义
         self.BACKGROUND_COLOR = (227, 205, 168)  # 竹简色 #E3CDA8
-        self.GRID_COLOR = (139, 90, 43)    # 深木色 #8B5A2B
+        self.GRID_COLOR = (224, 204, 155)    # 深木色 #8B5A2B
         self.RED_COLOR = (178, 34, 34)     # 深红色 #B22222
         self.BLUE_COLOR = (30, 58, 95)     # 深蓝色 #1E3A5F
         self.RIVER_COLOR = (118, 195, 229)  # 柔和蓝色 #76C3E5
@@ -282,13 +282,13 @@ class DouShouQi:
         start_y = (self.WINDOW_SIZE[1] - 9 * self.CELL_SIZE) // 2
 
         # 绘制所有格子的草地背景
-        if self.piece_images.get('grass'):
+        if self.piece_images.get('tile'):
             for row in range(9):
                 for col in range(7):
-                    grass_rect = pygame.Rect(start_x + col * self.CELL_SIZE,
+                    tile_rect = pygame.Rect(start_x + col * self.CELL_SIZE,
                                            start_y + row * self.CELL_SIZE,
                                            self.CELL_SIZE, self.CELL_SIZE)
-                    self.screen.blit(self.piece_images['grass'], grass_rect)
+                    self.screen.blit(self.piece_images['tile'], tile_rect)
         
         # 绘制特殊区域
         # 河流
@@ -584,17 +584,17 @@ class DouShouQi:
             trap_image = load_image(os.path.join('images', 'trap.png'), (self.CELL_SIZE, self.CELL_SIZE))
             den_image = load_image(os.path.join('images', 'den.png'), (self.CELL_SIZE, self.CELL_SIZE))
             water_image = load_image(os.path.join('images', 'water.png'), (self.CELL_SIZE, self.CELL_SIZE))
-            grass_image = load_image(os.path.join('images', 'grass.png'), (self.CELL_SIZE, self.CELL_SIZE))
+            tile_image = load_image(os.path.join('images', 'tile.png'), (self.CELL_SIZE, self.CELL_SIZE))
             self.piece_images['trap'] = trap_image
             self.piece_images['den'] = den_image
             self.piece_images['water'] = water_image
-            self.piece_images['grass'] = grass_image
+            self.piece_images['tile'] = tile_image
         except FileNotFoundError as e:
             print(f"警告：找不到特殊区域图片文件：{e}")
             self.piece_images['trap'] = None
             self.piece_images['den'] = None
             self.piece_images['water'] = None
-            self.piece_images['grass'] = None
+            self.piece_images['tile'] = None
 
     def init_pieces(self):
         # 初始化蓝方棋子
