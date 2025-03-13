@@ -1,7 +1,8 @@
 import pygame
 import sys
 from enum import Enum
-from utils import load_svg, get_piece_image_path
+from utils import load_image, get_piece_image_path
+import os
 
 # 初始化Pygame
 pygame.init()
@@ -140,6 +141,9 @@ class DouShouQi:
         self.CELL_SIZE = min(self.BOARD_SIZE[0] // 7, self.BOARD_SIZE[1] // 9)
         self.LINE_WIDTH = max(2, self.CELL_SIZE // 20)  # 根据格子大小调整线条粗细
         
+        # 初始化棋子图片字典
+        self.piece_images = {}
+        
         # 加载棋子图片
         self.load_piece_images()
         
@@ -273,8 +277,6 @@ class DouShouQi:
                         9 * self.CELL_SIZE + 2 * self.LINE_WIDTH),
                        self.LINE_WIDTH)
         
-
-        
         # 计算棋盘的起始位置（居中）
         start_x = (self.WINDOW_SIZE[0] - 7 * self.CELL_SIZE) // 2
         start_y = (self.WINDOW_SIZE[1] - 9 * self.CELL_SIZE) // 2
@@ -350,25 +352,35 @@ class DouShouQi:
                     color = self.RED_COLOR if piece.player == 'red' else self.BLUE_COLOR
                     center_x = start_x + col * self.CELL_SIZE + self.CELL_SIZE // 2
                     center_y = start_y + row * self.CELL_SIZE + self.CELL_SIZE // 2
+                    piece_radius = self.CELL_SIZE // 3
                     
-                    # 绘制棋子圆形
+                    # 绘制棋子底色
                     pygame.draw.circle(self.screen, color,
                                      (center_x, center_y),
-                                     self.CELL_SIZE // 3)
+                                     piece_radius)
+                    
+                    # 绘制棋子边框
+                    pygame.draw.circle(self.screen, color,
+                                     (center_x, center_y),
+                                     piece_radius,
+                                     max(2, self.CELL_SIZE // 20))
                     
                     # 绘制选中效果
                     if piece.selected or (self.dragging and piece == self.selected_piece):
                         pygame.draw.circle(self.screen, (255, 255, 0),
                                          (center_x, center_y),
-                                         self.CELL_SIZE // 3, 2)
+                                         piece_radius, 2)
                     
                     # 绘制棋子图片
                     image = self.piece_images.get((piece.type, piece.player))
                     if image:
+                        # 计算图片缩放尺寸（填充圆形区域）
+                        scaled_size = int(piece_radius * 1.618)  # 稍微放大以填满圆形
+                        scaled_image = pygame.transform.scale(image, (scaled_size, scaled_size))
                         # 计算图片位置（居中显示）
-                        image_rect = image.get_rect()
+                        image_rect = scaled_image.get_rect()
                         image_rect.center = (center_x, center_y)
-                        self.screen.blit(image, image_rect)
+                        self.screen.blit(scaled_image, image_rect)
                     else:
                         # 如果没有找到图片，使用文字作为后备显示
                         piece_name = {
@@ -517,17 +529,31 @@ class DouShouQi:
             self.log_file.flush()
 
     def load_piece_images(self):
-        # 加载所有棋子的SVG图片
-        piece_size = (self.CELL_SIZE // 2, self.CELL_SIZE // 2)  # 棋子图片大小为格子的一半
+        # 加载所有棋子的PNG图片
+        piece_size = (self.CELL_SIZE * 0.618, self.CELL_SIZE * 0.618)  # 棋子图片大小为格子的一半
+        print(self.CELL_SIZE, piece_size)
+        piece_names = {
+            PieceType.ELEPHANT: 'elephant',
+            PieceType.LION: 'lion',
+            PieceType.TIGER: 'tiger',
+            PieceType.LEOPARD: 'leopard',
+            PieceType.WOLF: 'wolf',
+            PieceType.DOG: 'dog',
+            PieceType.CAT: 'cat',
+            PieceType.RAT: 'rat'
+        }
+        
         for piece_type in PieceType:
-            for player in ['red', 'blue']:
-                try:
-                    image_path = get_piece_image_path(piece_type, player)
-                    image = load_svg(image_path, piece_size)
-                    self.piece_images[(piece_type, player)] = image
-                except FileNotFoundError:
-                    print(f"警告：找不到图片文件 {image_path}")
-                    self.piece_images[(piece_type, player)] = None
+            try:
+                image_path = os.path.join('images', f'{piece_names[piece_type]}.png')
+                image = load_image(image_path, piece_size)
+                # 为红蓝双方都使用相同的图片
+                self.piece_images[(piece_type, 'red')] = image
+                self.piece_images[(piece_type, 'blue')] = image
+            except FileNotFoundError:
+                print(f"警告：找不到图片文件 {image_path}")
+                self.piece_images[(piece_type, 'red')] = None
+                self.piece_images[(piece_type, 'blue')] = None
 
     def init_pieces(self):
         # 初始化蓝方棋子
