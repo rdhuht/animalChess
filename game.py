@@ -293,44 +293,50 @@ class DouShouQi:
         # 陷阱
         trap_positions = [(0, 2), (0, 4), (1, 3), (8, 2), (8, 4), (7, 3)]
         for row, col in trap_positions:
-            # 绘制陷阱底色
-            pygame.draw.rect(self.screen, self.TRAP_COLOR,
-                           (start_x + col * self.CELL_SIZE,
-                            start_y + row * self.CELL_SIZE,
-                            self.CELL_SIZE, self.CELL_SIZE))
-            # 绘制十字形图案
-            center_x = start_x + col * self.CELL_SIZE + self.CELL_SIZE // 2
-            center_y = start_y + row * self.CELL_SIZE + self.CELL_SIZE // 2
-            line_length = self.CELL_SIZE // 3
-            # 绘制横线
-            pygame.draw.line(self.screen, self.GRID_COLOR,
-                           (center_x - line_length, center_y),
-                           (center_x + line_length, center_y),
-                           2)
-            # 绘制竖线
-            pygame.draw.line(self.screen, self.GRID_COLOR,
-                           (center_x, center_y - line_length),
-                           (center_x, center_y + line_length),
-                           2)
+            if self.piece_images.get('trap'):
+                # 使用图片绘制陷阱
+                trap_rect = pygame.Rect(start_x + col * self.CELL_SIZE,
+                                      start_y + row * self.CELL_SIZE,
+                                      self.CELL_SIZE, self.CELL_SIZE)
+                self.screen.blit(self.piece_images['trap'], trap_rect)
+            else:
+                # 如果没有图片，使用原有的绘制方式
+                pygame.draw.rect(self.screen, self.TRAP_COLOR,
+                               (start_x + col * self.CELL_SIZE,
+                                start_y + row * self.CELL_SIZE,
+                                self.CELL_SIZE, self.CELL_SIZE))
+                center_x = start_x + col * self.CELL_SIZE + self.CELL_SIZE // 2
+                center_y = start_y + row * self.CELL_SIZE + self.CELL_SIZE // 2
+                line_length = self.CELL_SIZE // 3
+                pygame.draw.line(self.screen, self.GRID_COLOR,
+                               (center_x - line_length, center_y),
+                               (center_x + line_length, center_y), 2)
+                pygame.draw.line(self.screen, self.GRID_COLOR,
+                               (center_x, center_y - line_length),
+                               (center_x, center_y + line_length), 2)
         
         # 兽穴
         den_positions = [(0, 3), (8, 3)]
         for row, col in den_positions:
-            center_x = start_x + col * self.CELL_SIZE + self.CELL_SIZE // 2
-            center_y = start_y + row * self.CELL_SIZE + self.CELL_SIZE // 2
-            # 绘制圆形底色
-            pygame.draw.circle(self.screen, self.DEN_COLOR,
-                             (center_x, center_y),
-                             self.CELL_SIZE // 2)
-            # 绘制内部装饰圆环
-            pygame.draw.circle(self.screen, self.GRID_COLOR,
-                             (center_x, center_y),
-                             self.CELL_SIZE // 3,
-                             2)
-            # 绘制中心点
-            pygame.draw.circle(self.screen, self.GRID_COLOR,
-                             (center_x, center_y),
-                             self.CELL_SIZE // 8)
+            if self.piece_images.get('den'):
+                # 使用图片绘制兽穴
+                den_rect = pygame.Rect(start_x + col * self.CELL_SIZE,
+                                     start_y + row * self.CELL_SIZE,
+                                     self.CELL_SIZE, self.CELL_SIZE)
+                self.screen.blit(self.piece_images['den'], den_rect)
+            else:
+                # 如果没有图片，使用原有的绘制方式
+                center_x = start_x + col * self.CELL_SIZE + self.CELL_SIZE // 2
+                center_y = start_y + row * self.CELL_SIZE + self.CELL_SIZE // 2
+                pygame.draw.circle(self.screen, self.DEN_COLOR,
+                                 (center_x, center_y),
+                                 self.CELL_SIZE // 2)
+                pygame.draw.circle(self.screen, self.GRID_COLOR,
+                                 (center_x, center_y),
+                                 self.CELL_SIZE // 3, 2)
+                pygame.draw.circle(self.screen, self.GRID_COLOR,
+                                 (center_x, center_y),
+                                 self.CELL_SIZE // 8)
         
         # 绘制横线
         for i in range(10):
@@ -543,6 +549,7 @@ class DouShouQi:
             PieceType.RAT: 'rat'
         }
         
+        # 加载棋子图片
         for piece_type in PieceType:
             try:
                 image_path = os.path.join('images', f'{piece_names[piece_type]}.png')
@@ -554,6 +561,17 @@ class DouShouQi:
                 print(f"警告：找不到图片文件 {image_path}")
                 self.piece_images[(piece_type, 'red')] = None
                 self.piece_images[(piece_type, 'blue')] = None
+        
+        # 加载陷阱和兽穴图片
+        try:
+            trap_image = load_image(os.path.join('images', 'trap.png'), (self.CELL_SIZE, self.CELL_SIZE))
+            den_image = load_image(os.path.join('images', 'den.png'), (self.CELL_SIZE, self.CELL_SIZE))
+            self.piece_images['trap'] = trap_image
+            self.piece_images['den'] = den_image
+        except FileNotFoundError as e:
+            print(f"警告：找不到特殊区域图片文件：{e}")
+            self.piece_images['trap'] = None
+            self.piece_images['den'] = None
 
     def init_pieces(self):
         # 初始化蓝方棋子
