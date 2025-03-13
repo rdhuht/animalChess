@@ -189,6 +189,7 @@ class DouShouQi:
         # 初始化棋子位置
         self.init_pieces()
 
+
     def init_log_file(self):
         self.log_file = open('game_log.txt', 'w', encoding='utf-8')
         from datetime import datetime
@@ -197,6 +198,7 @@ class DouShouQi:
         self.log_file.write('对局开始时间：' + current_time + '\n')
         self.log_file.write('=' * 30 + '\n')
         self.log_file.flush()
+
 
     def log_move(self, piece, old_pos, new_pos, captured_piece=None):
         from datetime import datetime
@@ -234,6 +236,7 @@ class DouShouQi:
         self.log_remaining_pieces()
         self.log_file.flush()
 
+
     def log_remaining_pieces(self):
         red_pieces = []
         blue_pieces = []
@@ -259,6 +262,7 @@ class DouShouQi:
         self.log_file.write(f'红方剩余棋子：{",".join(red_pieces)}\n')
         self.log_file.write(f'蓝方剩余棋子：{",".join(blue_pieces)}\n')
         self.log_file.write('-' * 30 + '\n')
+
 
     def check_win(self):
         # 检查是否有一方进入对方兽穴
@@ -289,6 +293,7 @@ class DouShouQi:
 
         return None
 
+
     def get_valid_moves(self, piece):
         valid_moves = []
         for row in range(9):
@@ -298,6 +303,7 @@ class DouShouQi:
                     if target_piece is None or piece.can_capture(target_piece, self.board):
                         valid_moves.append((row, col))
         return valid_moves
+
 
     def draw_board(self):
         # 绘制棋盘背景
@@ -471,6 +477,7 @@ class DouShouQi:
                         text_rect = text.get_rect(center=(center_x, center_y))
                         self.screen.blit(text, text_rect)
     
+
     def get_board_position(self, mouse_pos):
         # 计算棋盘的起始位置
         start_x = (self.WINDOW_SIZE[0] - 7 * self.CELL_SIZE) // 2
@@ -486,6 +493,7 @@ class DouShouQi:
             return row, col
         return None
     
+
     def run(self):
         while True:
             for event in pygame.event.get():
@@ -565,7 +573,8 @@ class DouShouQi:
                 self.screen.blit(winner_surface, text_rect)
             
             pygame.display.flip()
-    
+
+
     def save_board_state(self):
         # 保存当前棋盘状态
         state = []
@@ -582,7 +591,8 @@ class DouShouQi:
             'board': state,
             'current_player': self.current_player
         }
-    
+
+
     def restore_board_state(self, state):
         # 恢复棋盘状态
         self.board = [[None for _ in range(7)] for _ in range(9)]
@@ -592,13 +602,6 @@ class DouShouQi:
             self.board[row][col] = piece
         self.current_player = state['current_player']
     
-    def undo_move(self):
-        if self.move_history and self.undo_chances[self.current_player] > 0:
-            previous_state = self.move_history.pop()
-            self.restore_board_state(previous_state)
-            self.undo_chances[self.current_player] -= 1
-            self.log_file.write(f'{"红方" if self.current_player == "red" else "蓝方"}进行了悔棋，剩余{self.undo_chances[self.current_player]}次机会\n')
-            self.log_file.flush()
 
     def load_piece_images(self):
         # 加载所有棋子的PNG图片
@@ -624,7 +627,7 @@ class DouShouQi:
                 self.piece_images[(piece_type, 'red')] = image
                 self.piece_images[(piece_type, 'blue')] = image
             except FileNotFoundError:
-                print(f"警告：找不到图片文件 {image_path}")
+                print(f"警告：找不到图片文件：{image_path}")
                 self.piece_images[(piece_type, 'red')] = None
                 self.piece_images[(piece_type, 'blue')] = None
         
@@ -644,6 +647,7 @@ class DouShouQi:
             self.piece_images['den'] = None
             self.piece_images['water'] = None
             self.piece_images['tile'] = None
+
 
     def init_pieces(self):
         # 初始化蓝方棋子
@@ -665,6 +669,7 @@ class DouShouQi:
         self.board[6][4] = Piece(PieceType.LEOPARD, 'red', (6, 4))
         self.board[6][2] = Piece(PieceType.WOLF, 'red', (6, 2))
         self.board[6][0] = Piece(PieceType.ELEPHANT, 'red', (6, 0))
+
 
 if __name__ == '__main__':
     game = DouShouQi()
