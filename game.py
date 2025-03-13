@@ -30,14 +30,33 @@ class Piece:
         row, col = self.pos
         target_row, target_col = target_pos
         
-        # 狮虎跳到河对岸的规则
+        # 狮虎跳河规则
         if self.type in [PieceType.LION, PieceType.TIGER]:
             # 检查是否是横向或纵向跳跃
             if (row == target_row and abs(col - target_col) == 3) or \
                (col == target_col and abs(row - target_row) == 4):
-                # 检查是否跨河
-                if self._is_valid_jump(row, col, target_row, target_col, board):
-                    return True
+                # 检查是否在河流两侧
+                if row == target_row:  # 横向跳跃
+                    # 确保起点和终点都不在河中
+                    if not self._is_river(row, col) and not self._is_river(target_row, target_col):
+                        # 确保中间是河流
+                        middle_col1 = min(col, target_col) + 1
+                        middle_col2 = min(col, target_col) + 2
+                        if self._is_river(row, middle_col1) and self._is_river(row, middle_col2):
+                            # 检查是否有老鼠阻挡
+                            if self._is_valid_jump(row, col, target_row, target_col, board):
+                                return True
+                else:  # 纵向跳跃
+                    # 确保起点和终点都不在河中
+                    if not self._is_river(row, col) and not self._is_river(target_row, target_col):
+                        # 确保中间是河流
+                        middle_row1 = min(row, target_row) + 1
+                        middle_row2 = min(row, target_row) + 2
+                        middle_row3 = min(row, target_row) + 3
+                        if self._is_river(middle_row1, col) and self._is_river(middle_row2, col) and self._is_river(middle_row3, col):
+                            # 检查是否有老鼠阻挡
+                            if self._is_valid_jump(row, col, target_row, target_col, board):
+                                return True
         
         # 基本移动规则：只能上下左右移动一格
         if abs(row - target_row) + abs(col - target_col) != 1:
