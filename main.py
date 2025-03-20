@@ -141,10 +141,22 @@ class DouShouQi:
         self.screen = pygame.display.set_mode(self.WINDOW_SIZE)
         pygame.display.set_caption('斗兽棋')
         
-        # 初始化字体
-        self.font = pygame.font.SysFont('SimHei', 30)
-        self.turn_font = pygame.font.SysFont('SimHei', 40)  # 回合提示字体
-        self.winner_font = pygame.font.SysFont('SimHei', 60)  # 获胜提示字体
+        # 初始化字体，使用系统默认中文字体
+        try:
+            self.font = pygame.font.Font('/System/Library/Fonts/PingFang.ttc', 30)
+            self.turn_font = pygame.font.Font('/System/Library/Fonts/PingFang.ttc', 40)
+            self.winner_font = pygame.font.Font('/System/Library/Fonts/PingFang.ttc', 60)
+        except:
+            # 如果找不到 PingFang 字体，尝试使用其他中文字体
+            try:
+                self.font = pygame.font.Font('/System/Library/Fonts/STHeiti Light.ttc', 30)
+                self.turn_font = pygame.font.Font('/System/Library/Fonts/STHeiti Light.ttc', 40)
+                self.winner_font = pygame.font.Font('/System/Library/Fonts/STHeiti Light.ttc', 60)
+            except:
+                # 如果还是找不到，使用系统默认字体
+                self.font = pygame.font.SysFont('SimHei', 30)
+                self.turn_font = pygame.font.SysFont('SimHei', 40)
+                self.winner_font = pygame.font.SysFont('SimHei', 60)
         
         # 颜色定义
         self.BACKGROUND_COLOR = (227, 205, 168)  # 竹简色 #E3CDA8
